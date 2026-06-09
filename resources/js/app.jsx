@@ -1,14 +1,23 @@
-//
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 function App() {
+    const token = localStorage.getItem('token');
+
     return (
-        <div>
-            <h1>HR System is alive 🚀</h1>
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
-const root = createRoot(document.getElementById('app'));
+const container = document.getElementById('app');
+const root = createRoot(container);
 root.render(<App />);
