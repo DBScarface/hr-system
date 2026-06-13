@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
 import './index.css';
+import Attendance from './pages/Attendance';
 
 function App() {
     const token = localStorage.getItem('token');
@@ -18,6 +19,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/employees" element={token ? <Employees /> : <Navigate to="/login" replace />} />
+                    <Route path="/attendance" element={token ? <Attendance /> : <Navigate to="/login" replace />} />
                 </Routes>
             </BrowserRouter>
         </AppProvider>
