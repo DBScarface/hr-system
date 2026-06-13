@@ -1,7 +1,9 @@
 import React from 'react';
 import AppLayout from '../layouts/AppLayout';
+import { useApp } from '../context/AppContext';
 
 export default function Dashboard() {
+    const { dark } = useApp();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const metrics = [
@@ -34,19 +36,23 @@ export default function Dashboard() {
     ];
 
     const card = {
-        background: '#ffffff',
-        border: '1px solid #e5e5ea',
+        background: dark ? '#1a2540' : '#ffffff',
+        border: `1px solid ${dark ? '#1e2d45' : '#e5e5ea'}`,
         borderRadius: '10px',
         padding: '18px',
     };
 
+    const textPrimary = dark ? '#e8edf5' : '#1d1d1f';
+    const textMuted = dark ? '#6b8cae' : '#8888a0';
+    const rowBorder = dark ? '#1e2d45' : '#f0f0f5';
+
     return (
         <AppLayout>
             {/* Page Header */}
-            <h1 style={{ fontSize: '20px', fontWeight: '500', color: '#1d1d1f', margin: '0 0 4px' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: '500', color: textPrimary, margin: '0 0 4px' }}>
                 Good morning, {user.name?.split(' ')[0]} 👋
             </h1>
-            <p style={{ fontSize: '13px', color: '#8888a0', margin: '0 0 24px' }}>
+            <p style={{ fontSize: '13px', color: textMuted, margin: '0 0 24px' }}>
                 Real-time operational intelligence across all departments.
             </p>
 
@@ -57,10 +63,10 @@ export default function Dashboard() {
             }}>
                 {metrics.map((m, i) => (
                     <div key={i} style={card}>
-                        <div style={{ fontSize: '11px', color: '#8888a0', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <div style={{ fontSize: '11px', color: textMuted, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                             {m.label}
                         </div>
-                        <div style={{ fontSize: '24px', fontWeight: '500', color: '#1d1d1f' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '500', color: textPrimary }}>
                             {m.value}
                         </div>
                         <div style={{ fontSize: '11px', color: m.color, marginTop: '4px' }}>
@@ -73,13 +79,13 @@ export default function Dashboard() {
             {/* Main Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '12px' }}>
 
-                {/* Left — Attendance + Employees */}
+                {/* Left */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                     {/* Attendance Chart */}
                     <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '500', color: '#1d1d1f' }}>Attendance insights</span>
+                            <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Attendance insights</span>
                             <span style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}>View all</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '80px', marginBottom: '8px' }}>
@@ -88,10 +94,10 @@ export default function Dashboard() {
                                     <div style={{
                                         width: '100%',
                                         height: `${a.pct}%`,
-                                        background: a.today ? '#534AB7' : '#EEEDFE',
+                                        background: a.today ? '#534AB7' : dark ? '#1e2d45' : '#EEEDFE',
                                         borderRadius: '4px 4px 0 0',
                                     }} />
-                                    <span style={{ fontSize: '10px', color: a.today ? '#534AB7' : '#aaaabc', fontWeight: a.today ? '500' : '400' }}>
+                                    <span style={{ fontSize: '10px', color: a.today ? '#534AB7' : textMuted, fontWeight: a.today ? '500' : '400' }}>
                                         {a.day}
                                     </span>
                                 </div>
@@ -102,14 +108,14 @@ export default function Dashboard() {
                     {/* Employee List */}
                     <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '500', color: '#1d1d1f' }}>Recent employees</span>
+                            <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Recent employees</span>
                             <span style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}>View all</span>
                         </div>
                         {employees.map((e, i) => (
                             <div key={i} style={{
                                 display: 'flex', alignItems: 'center', gap: '10px',
                                 padding: '8px 0',
-                                borderBottom: i < employees.length - 1 ? '1px solid #f0f0f5' : 'none',
+                                borderBottom: i < employees.length - 1 ? `1px solid ${rowBorder}` : 'none',
                             }}>
                                 <div style={{
                                     width: '30px', height: '30px', borderRadius: '50%',
@@ -120,8 +126,8 @@ export default function Dashboard() {
                                     {e.initials}
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '13px', color: '#1d1d1f' }}>{e.name}</div>
-                                    <div style={{ fontSize: '11px', color: '#8888a0' }}>{e.role}</div>
+                                    <div style={{ fontSize: '13px', color: textPrimary }}>{e.name}</div>
+                                    <div style={{ fontSize: '11px', color: textMuted }}>{e.role}</div>
                                 </div>
                                 <span style={{
                                     fontSize: '10px', padding: '2px 8px', borderRadius: '4px',
@@ -135,25 +141,26 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Right — Action Items + Payroll Alert */}
+                {/* Right */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                     {/* Action Items */}
                     <div style={card}>
-                        <div style={{ fontSize: '13px', fontWeight: '500', color: '#1d1d1f', marginBottom: '14px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '500', color: textPrimary, marginBottom: '14px' }}>
                             Action items
                         </div>
                         {actions.map((a, i) => (
                             <div key={i} style={{
-                                background: '#f8f8fa', border: '1px solid #e5e5ea',
+                                background: dark ? '#0f1a2e' : '#f8f8fa',
+                                border: `1px solid ${dark ? '#1e2d45' : '#e5e5ea'}`,
                                 borderRadius: '8px', padding: '10px 12px',
                                 marginBottom: i < actions.length - 1 ? '8px' : '0',
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                                     <span style={{ fontSize: '13px' }}>{a.icon}</span>
-                                    <span style={{ fontSize: '12px', fontWeight: '500', color: '#1d1d1f' }}>{a.title}</span>
+                                    <span style={{ fontSize: '12px', fontWeight: '500', color: textPrimary }}>{a.title}</span>
                                 </div>
-                                <div style={{ fontSize: '11px', color: '#8888a0', marginBottom: '8px' }}>{a.sub}</div>
+                                <div style={{ fontSize: '11px', color: textMuted, marginBottom: '8px' }}>{a.sub}</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <button style={{
                                         background: '#534AB7', color: '#fff', border: 'none',
@@ -172,13 +179,14 @@ export default function Dashboard() {
 
                     {/* Payroll Alert */}
                     <div style={{
-                        background: '#EEEDFE', border: '1px solid #AFA9EC',
+                        background: dark ? '#1a1a3a' : '#EEEDFE',
+                        border: `1px solid ${dark ? '#3C3489' : '#AFA9EC'}`,
                         borderRadius: '10px', padding: '16px',
                     }}>
-                        <div style={{ fontSize: '13px', fontWeight: '500', color: '#3C3489', marginBottom: '4px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '500', color: dark ? '#AFA9EC' : '#3C3489', marginBottom: '4px' }}>
                             Payroll deadline
                         </div>
-                        <div style={{ fontSize: '12px', color: '#534AB7', marginBottom: '12px', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '12px', color: dark ? '#8880c8' : '#534AB7', marginBottom: '12px', lineHeight: '1.5' }}>
                             Finalize Q3 bonuses by tomorrow at 5:00 PM to ensure timely payout.
                         </div>
                         <button style={{

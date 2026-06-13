@@ -1,22 +1,26 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
+import './index.css';
 
 function App() {
     const token = localStorage.getItem('token');
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Navigate to="/login" replace />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
-                <Route path="/employees" element={token ? <Employees /> : <Navigate to="/login" replace />} />
-            </Routes>
-        </BrowserRouter>
+        <AppProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
+                    <Route path="/employees" element={token ? <Employees /> : <Navigate to="/login" replace />} />
+                </Routes>
+            </BrowserRouter>
+        </AppProvider>
     );
 }
 

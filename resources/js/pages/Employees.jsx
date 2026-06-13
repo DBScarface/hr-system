@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from '../layouts/AppLayout';
 import api from '../services/api';
+import { useApp } from '../context/AppContext';
 
 export default function Employees() {
+    const { theme } = useApp();
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -15,9 +17,7 @@ export default function Employees() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchEmployees();
-    }, []);
+    useEffect(() => { fetchEmployees(); }, []);
 
     const fetchEmployees = async () => {
         try {
@@ -37,11 +37,7 @@ export default function Employees() {
             const res = await api.post('/employees', form);
             setEmployees([res.data, ...employees]);
             setShowModal(false);
-            setForm({
-                first_name: '', last_name: '', email: '', phone: '',
-                department: '', position: '', status: 'active',
-                hire_date: '', salary: '',
-            });
+            setForm({ first_name: '', last_name: '', email: '', phone: '', department: '', position: '', status: 'active', hire_date: '', salary: '' });
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong');
         } finally {
@@ -62,15 +58,6 @@ export default function Employees() {
 
     const departments = ['Engineering', 'Design', 'Sales', 'People', 'Operations', 'Finance'];
 
-    const statusBadge = (status) => ({
-        background: status === 'active' ? '#eaf3de' : '#faeeda',
-        color: status === 'active' ? '#3b6d11' : '#854f0b',
-        fontSize: '10px', padding: '2px 8px',
-        borderRadius: '4px', fontWeight: '500',
-    });
-
-    const initials = (e) => `${e.first_name[0]}${e.last_name[0]}`;
-
     const avatarColors = [
         { bg: '#EEEDFE', text: '#534AB7' },
         { bg: '#e1f5ee', text: '#0f6e56' },
@@ -82,9 +69,9 @@ export default function Employees() {
 
     const inputStyle = {
         width: '100%', height: '38px',
-        border: '1px solid #e5e5ea', borderRadius: '8px',
-        padding: '0 12px', fontSize: '13px',
-        background: '#fafafa', color: '#1d1d1f',
+        border: `1px solid ${theme.border}`,
+        borderRadius: '8px', padding: '0 12px', fontSize: '13px',
+        background: theme.inputBg, color: theme.textPrimary,
         outline: 'none', boxSizing: 'border-box',
     };
 
@@ -93,21 +80,18 @@ export default function Employees() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                 <div>
-                    <h1 style={{ fontSize: '20px', fontWeight: '500', color: '#1d1d1f', margin: '0 0 4px' }}>
+                    <h1 style={{ fontSize: '20px', fontWeight: '500', color: theme.textPrimary, margin: '0 0 4px' }}>
                         Employees
                     </h1>
-                    <p style={{ fontSize: '13px', color: '#8888a0', margin: 0 }}>
+                    <p style={{ fontSize: '13px', color: theme.textMuted, margin: 0 }}>
                         {employees.length} total employees
                     </p>
                 </div>
-                <button
-                    onClick={() => setShowModal(true)}
-                    style={{
-                        background: '#534AB7', color: '#fff', border: 'none',
-                        padding: '9px 16px', borderRadius: '8px',
-                        fontSize: '13px', fontWeight: '500', cursor: 'pointer',
-                    }}
-                >
+                <button onClick={() => setShowModal(true)} style={{
+                    background: '#534AB7', color: '#fff', border: 'none',
+                    padding: '9px 16px', borderRadius: '8px',
+                    fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                }}>
                     + Add employee
                 </button>
             </div>
@@ -118,39 +102,29 @@ export default function Employees() {
                 placeholder="Search by name, email, department..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                style={{
-                    ...inputStyle,
-                    marginBottom: '16px', height: '40px',
-                    background: '#fff', border: '1px solid #e5e5ea',
-                }}
+                style={{ ...inputStyle, marginBottom: '16px', height: '40px' }}
             />
 
             {/* Table */}
-            <div style={{ background: '#fff', border: '1px solid #e5e5ea', borderRadius: '10px', overflow: 'hidden' }}>
-                {/* Table Header */}
+            <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '10px', overflow: 'hidden' }}>
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
                     padding: '10px 16px',
-                    borderBottom: '1px solid #f0f0f5',
-                    background: '#f8f8fa',
+                    borderBottom: `1px solid ${theme.border}`,
+                    background: theme.actionBg,
                 }}>
                     {['Employee', 'Email', 'Department', 'Position', 'Status', 'Hire date', ''].map((h, i) => (
-                        <div key={i} style={{ fontSize: '11px', color: '#8888a0', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                        <div key={i} style={{ fontSize: '11px', color: theme.textMuted, fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                             {h}
                         </div>
                     ))}
                 </div>
 
-                {/* Rows */}
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#8888a0', fontSize: '13px' }}>
-                        Loading...
-                    </div>
+                    <div style={{ padding: '40px', textAlign: 'center', color: theme.textMuted, fontSize: '13px' }}>Loading...</div>
                 ) : filtered.length === 0 ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#8888a0', fontSize: '13px' }}>
-                        No employees found.
-                    </div>
+                    <div style={{ padding: '40px', textAlign: 'center', color: theme.textMuted, fontSize: '13px' }}>No employees found.</div>
                 ) : (
                     filtered.map((e, i) => {
                         const av = avatarColors[i % avatarColors.length];
@@ -159,13 +133,12 @@ export default function Employees() {
                                 display: 'grid',
                                 gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
                                 padding: '12px 16px', alignItems: 'center',
-                                borderBottom: i < filtered.length - 1 ? '1px solid #f0f0f5' : 'none',
+                                borderBottom: i < filtered.length - 1 ? `1px solid ${theme.rowBorder}` : 'none',
                                 transition: 'background 0.1s',
                             }}
-                                onMouseEnter={ev => ev.currentTarget.style.background = '#fafafa'}
+                                onMouseEnter={ev => ev.currentTarget.style.background = theme.hoverBg}
                                 onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}
                             >
-                                {/* Name */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{
                                         width: '30px', height: '30px', borderRadius: '50%',
@@ -173,30 +146,30 @@ export default function Employees() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontSize: '10px', fontWeight: '600', flexShrink: 0,
                                     }}>
-                                        {initials(e)}
+                                        {e.first_name[0]}{e.last_name[0]}
                                     </div>
-                                    <span style={{ fontSize: '13px', color: '#1d1d1f', fontWeight: '500' }}>
+                                    <span style={{ fontSize: '13px', color: theme.textPrimary, fontWeight: '500' }}>
                                         {e.first_name} {e.last_name}
                                     </span>
                                 </div>
-
-                                <div style={{ fontSize: '12px', color: '#6e6e73' }}>{e.email}</div>
-                                <div style={{ fontSize: '12px', color: '#6e6e73' }}>{e.department}</div>
-                                <div style={{ fontSize: '12px', color: '#6e6e73' }}>{e.position}</div>
-                                <span style={statusBadge(e.status)}>
+                                <div style={{ fontSize: '12px', color: theme.textMuted }}>{e.email}</div>
+                                <div style={{ fontSize: '12px', color: theme.textMuted }}>{e.department}</div>
+                                <div style={{ fontSize: '12px', color: theme.textMuted }}>{e.position}</div>
+                                <span style={{
+                                    fontSize: '10px', padding: '2px 8px', borderRadius: '4px',
+                                    background: e.status === 'active' ? '#eaf3de' : '#faeeda',
+                                    color: e.status === 'active' ? '#3b6d11' : '#854f0b',
+                                }}>
                                     {e.status === 'active' ? 'Active' : 'On leave'}
                                 </span>
-                                <div style={{ fontSize: '12px', color: '#6e6e73' }}>
+                                <div style={{ fontSize: '12px', color: theme.textMuted }}>
                                     {new Date(e.hire_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </div>
-                                <button
-                                    onClick={() => handleDelete(e.id)}
-                                    style={{
-                                        background: 'transparent', border: '1px solid #fecaca',
-                                        color: '#dc2626', padding: '4px 8px',
-                                        borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
-                                    }}
-                                >
+                                <button onClick={() => handleDelete(e.id)} style={{
+                                    background: 'transparent', border: '1px solid #fecaca',
+                                    color: '#dc2626', padding: '4px 8px',
+                                    borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
+                                }}>
                                     Delete
                                 </button>
                             </div>
@@ -205,33 +178,28 @@ export default function Employees() {
                 )}
             </div>
 
-            {/* Add Employee Modal */}
+            {/* Modal */}
             {showModal && (
                 <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000,
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
                 }}>
                     <div style={{
-                        background: '#fff', borderRadius: '14px',
+                        background: theme.cardBg, borderRadius: '14px',
                         padding: '28px', width: '100%', maxWidth: '480px',
                         maxHeight: '90vh', overflowY: 'auto',
+                        border: `1px solid ${theme.border}`,
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h2 style={{ fontSize: '16px', fontWeight: '500', color: '#1d1d1f', margin: 0 }}>
-                                Add employee
-                            </h2>
-                            <span onClick={() => setShowModal(false)} style={{ cursor: 'pointer', color: '#8888a0', fontSize: '18px' }}>✕</span>
+                            <h2 style={{ fontSize: '16px', fontWeight: '500', color: theme.textPrimary, margin: 0 }}>Add employee</h2>
+                            <span onClick={() => setShowModal(false)} style={{ cursor: 'pointer', color: theme.textMuted, fontSize: '18px' }}>✕</span>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                            {[
-                                { key: 'first_name', label: 'First name', type: 'text' },
-                                { key: 'last_name', label: 'Last name', type: 'text' },
-                            ].map(f => (
+                            {[{ key: 'first_name', label: 'First name' }, { key: 'last_name', label: 'Last name' }].map(f => (
                                 <div key={f.key}>
-                                    <label style={{ fontSize: '12px', color: '#8888a0', display: 'block', marginBottom: '4px' }}>{f.label}</label>
-                                    <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })} style={inputStyle} />
+                                    <label style={{ fontSize: '12px', color: theme.textMuted, display: 'block', marginBottom: '4px' }}>{f.label}</label>
+                                    <input type="text" value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })} style={inputStyle} />
                                 </div>
                             ))}
                         </div>
@@ -244,22 +212,22 @@ export default function Employees() {
                             { key: 'salary', label: 'Salary', type: 'number' },
                         ].map(f => (
                             <div key={f.key} style={{ marginBottom: '12px' }}>
-                                <label style={{ fontSize: '12px', color: '#8888a0', display: 'block', marginBottom: '4px' }}>{f.label}</label>
+                                <label style={{ fontSize: '12px', color: theme.textMuted, display: 'block', marginBottom: '4px' }}>{f.label}</label>
                                 <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })} style={inputStyle} />
                             </div>
                         ))}
 
                         <div style={{ marginBottom: '12px' }}>
-                            <label style={{ fontSize: '12px', color: '#8888a0', display: 'block', marginBottom: '4px' }}>Department</label>
-                            <select value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} style={{ ...inputStyle }}>
+                            <label style={{ fontSize: '12px', color: theme.textMuted, display: 'block', marginBottom: '4px' }}>Department</label>
+                            <select value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} style={inputStyle}>
                                 <option value="">Select department</option>
                                 {departments.map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
                         </div>
 
                         <div style={{ marginBottom: '20px' }}>
-                            <label style={{ fontSize: '12px', color: '#8888a0', display: 'block', marginBottom: '4px' }}>Status</label>
-                            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} style={{ ...inputStyle }}>
+                            <label style={{ fontSize: '12px', color: theme.textMuted, display: 'block', marginBottom: '4px' }}>Status</label>
+                            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} style={inputStyle}>
                                 <option value="active">Active</option>
                                 <option value="on_leave">On leave</option>
                             </select>
@@ -270,27 +238,22 @@ export default function Employees() {
                                 background: '#fef2f2', border: '1px solid #fecaca',
                                 borderRadius: '8px', padding: '10px 12px',
                                 fontSize: '12px', color: '#dc2626', marginBottom: '12px',
-                            }}>
-                                {error}
-                            </div>
+                            }}>{error}</div>
                         )}
 
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => setShowModal(false)} style={{
                                 flex: 1, height: '40px', background: 'transparent',
-                                border: '1px solid #e5e5ea', borderRadius: '8px',
-                                fontSize: '13px', cursor: 'pointer', color: '#6e6e73',
-                            }}>
-                                Cancel
-                            </button>
+                                border: `1px solid ${theme.border}`, borderRadius: '8px',
+                                fontSize: '13px', cursor: 'pointer', color: theme.textMuted,
+                            }}>Cancel</button>
                             <button onClick={handleAdd} disabled={saving} style={{
-                                flex: 1, height: '40px', background: saving ? '#8880c8' : '#534AB7',
+                                flex: 1, height: '40px',
+                                background: saving ? '#8880c8' : '#534AB7',
                                 border: 'none', borderRadius: '8px',
                                 fontSize: '13px', fontWeight: '500',
                                 cursor: saving ? 'not-allowed' : 'pointer', color: '#fff',
-                            }}>
-                                {saving ? 'Saving...' : 'Add employee'}
-                            </button>
+                            }}>{saving ? 'Saving...' : 'Add employee'}</button>
                         </div>
                     </div>
                 </div>

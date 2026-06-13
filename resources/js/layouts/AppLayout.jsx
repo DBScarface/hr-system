@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
+import { useApp } from '../context/AppContext';
 
 export default function AppLayout({ children }) {
-    const [dark, setDark] = useState(false);
-    const [lang, setLang] = useState('EN');
+    const { dark, setDark, lang, setLang, theme } = useApp();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -26,22 +26,18 @@ export default function AppLayout({ children }) {
         { key: 'settings', label: { EN: 'Settings', FR: 'Paramètres' }, icon: '⚙️', path: '/settings' },
     ];
 
-    const bg = dark ? '#0e0e16' : '#f4f4f6';
-    const sidebarBg = dark ? '#12121c' : '#ffffff';
-    const topbarBg = dark ? '#12121c' : '#ffffff';
-    const border = dark ? '#1e1e2e' : '#e5e5ea';
-    const textPrimary = dark ? '#f0f0f5' : '#1d1d1f';
-    const textMuted = dark ? '#6666808' : '#6e6e73';
-
     return (
         <div style={{
-            minHeight: '100vh', background: bg,
+            minHeight: '100vh',
+            background: theme.bg,
             fontFamily: 'Inter, system-ui, sans-serif',
-            display: 'flex', flexDirection: 'column',
+            display: 'flex',
+            flexDirection: 'column',
         }}>
             {/* Top Bar */}
             <div style={{
-                background: topbarBg, borderBottom: `1px solid ${border}`,
+                background: theme.topbarBg,
+                borderBottom: `1px solid ${theme.border}`,
                 height: '52px', padding: '0 24px',
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'space-between', flexShrink: 0,
@@ -56,7 +52,7 @@ export default function AppLayout({ children }) {
                     }}>
                         <span style={{ color: '#fff', fontSize: '13px', fontWeight: '600' }}>V</span>
                     </div>
-                    <span style={{ color: textPrimary, fontWeight: '500', fontSize: '15px' }}>Veltahr</span>
+                    <span style={{ color: theme.textPrimary, fontWeight: '500', fontSize: '15px' }}>Veltahr</span>
                 </div>
 
                 {/* Search */}
@@ -65,10 +61,10 @@ export default function AppLayout({ children }) {
                     placeholder={lang === 'EN' ? 'Search employees, documents...' : 'Rechercher...'}
                     style={{
                         width: '280px', height: '32px',
-                        border: `1px solid ${border}`, borderRadius: '8px',
-                        padding: '0 12px', fontSize: '12px',
-                        background: dark ? '#1a1a28' : '#f8f8fa',
-                        color: textPrimary, outline: 'none',
+                        border: `1px solid ${theme.border}`,
+                        borderRadius: '8px', padding: '0 12px', fontSize: '12px',
+                        background: theme.inputBg,
+                        color: theme.textPrimary, outline: 'none',
                     }}
                 />
 
@@ -76,15 +72,15 @@ export default function AppLayout({ children }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button onClick={() => setLang(lang === 'EN' ? 'FR' : 'EN')} style={{
                         padding: '4px 10px', borderRadius: '6px', fontSize: '12px',
-                        border: `1px solid ${border}`, background: 'transparent',
-                        cursor: 'pointer', color: textMuted,
+                        border: `1px solid ${theme.border}`, background: 'transparent',
+                        cursor: 'pointer', color: theme.textMuted,
                     }}>
                         {lang === 'EN' ? 'FR' : 'EN'}
                     </button>
                     <button onClick={() => setDark(!dark)} style={{
                         width: '30px', height: '30px', borderRadius: '6px',
-                        border: `1px solid ${border}`, background: 'transparent',
-                        cursor: 'pointer', color: textMuted, fontSize: '14px',
+                        border: `1px solid ${theme.border}`, background: 'transparent',
+                        cursor: 'pointer', color: theme.textMuted, fontSize: '14px',
                     }}>
                         {dark ? '☀' : '☾'}
                     </button>
@@ -104,8 +100,9 @@ export default function AppLayout({ children }) {
             <div style={{ display: 'flex', flex: 1 }}>
                 {/* Sidebar */}
                 <div style={{
-                    width: '200px', background: sidebarBg,
-                    borderRight: `1px solid ${border}`,
+                    width: '200px',
+                    background: theme.sidebarBg,
+                    borderRight: `1px solid ${theme.border}`,
                     display: 'flex', flexDirection: 'column',
                     justifyContent: 'space-between', flexShrink: 0,
                     padding: '12px 0',
@@ -121,8 +118,10 @@ export default function AppLayout({ children }) {
                                         display: 'flex', alignItems: 'center',
                                         gap: '10px', padding: '9px 16px',
                                         cursor: 'pointer', fontSize: '13px',
-                                        color: active ? '#534AB7' : textMuted,
-                                        background: active ? '#EEEDFE' : 'transparent',
+                                        color: active ? '#534AB7' : theme.textMuted,
+                                        background: active
+                                            ? dark ? '#1e1a3a' : '#EEEDFE'
+                                            : 'transparent',
                                         borderRight: active ? '2px solid #534AB7' : '2px solid transparent',
                                         transition: 'all 0.15s',
                                     }}
