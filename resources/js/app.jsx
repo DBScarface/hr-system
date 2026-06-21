@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
+import EmployeeProfile from './pages/EmployeeProfile';
 import './index.css';
 import Attendance from './pages/Attendance';
 import Payroll from './pages/Payroll';
@@ -22,6 +23,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/employees" element={token ? <Employees /> : <Navigate to="/login" replace />} />
+                    <Route path="/employees/:id" element={token ? <EmployeeProfile /> : <Navigate to="/login" replace />} />
                     <Route path="/attendance" element={token ? <Attendance /> : <Navigate to="/login" replace />} />
                     <Route path="/payroll" element={token ? <Payroll /> : <Navigate to="/login" replace />} />
                     <Route path="/reports" element={token ? <Reports /> : <Navigate to="/login" replace />} />

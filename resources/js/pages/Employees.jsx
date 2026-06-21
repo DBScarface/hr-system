@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout';
 import api from '../services/api';
 import { useApp } from '../context/AppContext';
 
 export default function Employees() {
     const { theme } = useApp();
+    const navigate = useNavigate();
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -45,7 +47,8 @@ export default function Employees() {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (ev, id) => {
+        ev.stopPropagation();
         if (!window.confirm('Delete this employee?')) return;
         await api.delete(`/employees/${id}`);
         setEmployees(employees.filter(e => e.id !== id));
@@ -129,13 +132,17 @@ export default function Employees() {
                     filtered.map((e, i) => {
                         const av = avatarColors[i % avatarColors.length];
                         return (
-                            <div key={e.id} style={{
-                                display: 'grid',
-                                gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
-                                padding: '12px 16px', alignItems: 'center',
-                                borderBottom: i < filtered.length - 1 ? `1px solid ${theme.rowBorder}` : 'none',
-                                transition: 'background 0.1s',
-                            }}
+                            <div
+                                key={e.id}
+                                onClick={() => navigate(`/employees/${e.id}`)}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
+                                    padding: '12px 16px', alignItems: 'center',
+                                    borderBottom: i < filtered.length - 1 ? `1px solid ${theme.rowBorder}` : 'none',
+                                    transition: 'background 0.1s',
+                                    cursor: 'pointer',
+                                }}
                                 onMouseEnter={ev => ev.currentTarget.style.background = theme.hoverBg}
                                 onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}
                             >
@@ -148,7 +155,7 @@ export default function Employees() {
                                     }}>
                                         {e.first_name[0]}{e.last_name[0]}
                                     </div>
-                                    <span style={{ fontSize: '13px', color: theme.textPrimary, fontWeight: '500' }}>
+                                    <span style={{ fontSize: '13px', color: '#534AB7', fontWeight: '500', textDecoration: 'underline' }}>
                                         {e.first_name} {e.last_name}
                                     </span>
                                 </div>
@@ -165,7 +172,7 @@ export default function Employees() {
                                 <div style={{ fontSize: '12px', color: theme.textMuted }}>
                                     {new Date(e.hire_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </div>
-                                <button onClick={() => handleDelete(e.id)} style={{
+                                <button onClick={(ev) => handleDelete(ev, e.id)} style={{
                                     background: 'transparent', border: '1px solid #fecaca',
                                     color: '#dc2626', padding: '4px 8px',
                                     borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
