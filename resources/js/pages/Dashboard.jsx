@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout';
 import { useApp } from '../context/AppContext';
 
 export default function Dashboard() {
     const { dark } = useApp();
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const metrics = [
@@ -30,10 +32,14 @@ export default function Dashboard() {
         { day: 'Sun', pct: 40 },
     ];
 
-    const actions = [
-        { icon: '📄', title: 'Leave request', sub: 'Alex Rivera · 2 days (Oct 16-18)' },
-        { icon: '🧾', title: 'Expense approval', sub: 'Marketing Team · $4,250' },
-    ];
+    const [actions, setActions] = useState([
+        { id: 1, icon: '📄', title: 'Leave request', sub: 'Alex Rivera · 2 days (Oct 16-18)', status: null },
+        { id: 2, icon: '🧾', title: 'Expense approval', sub: 'Marketing Team · $4,250', status: null },
+    ]);
+
+    const handleAction = (id, status) => {
+        setActions(actions.map(a => a.id === id ? { ...a, status } : a));
+    };
 
     const card = {
         background: dark ? '#1a2540' : '#ffffff',
@@ -86,7 +92,12 @@ export default function Dashboard() {
                     <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Attendance insights</span>
-                            <span style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}>View all</span>
+                            <span
+                                onClick={() => navigate('/attendance')}
+                                style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}
+                            >
+                                View all
+                            </span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '80px', marginBottom: '8px' }}>
                             {attendance.map((a, i) => (
@@ -109,7 +120,12 @@ export default function Dashboard() {
                     <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                             <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Recent employees</span>
-                            <span style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}>View all</span>
+                            <span
+                                onClick={() => navigate('/employees')}
+                                style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}
+                            >
+                                View all
+                            </span>
                         </div>
                         {employees.map((e, i) => (
                             <div key={i} style={{
@@ -150,29 +166,51 @@ export default function Dashboard() {
                             Action items
                         </div>
                         {actions.map((a, i) => (
-                            <div key={i} style={{
+                            <div key={a.id} style={{
                                 background: dark ? '#0f1a2e' : '#f8f8fa',
                                 border: `1px solid ${dark ? '#1e2d45' : '#e5e5ea'}`,
                                 borderRadius: '8px', padding: '10px 12px',
                                 marginBottom: i < actions.length - 1 ? '8px' : '0',
+                                opacity: a.status ? 0.6 : 1,
+                                transition: 'opacity 0.2s',
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                                     <span style={{ fontSize: '13px' }}>{a.icon}</span>
                                     <span style={{ fontSize: '12px', fontWeight: '500', color: textPrimary }}>{a.title}</span>
                                 </div>
                                 <div style={{ fontSize: '11px', color: textMuted, marginBottom: '8px' }}>{a.sub}</div>
-                                <div style={{ display: 'flex', gap: '6px' }}>
-                                    <button style={{
-                                        background: '#534AB7', color: '#fff', border: 'none',
-                                        padding: '4px 10px', borderRadius: '5px',
-                                        fontSize: '11px', cursor: 'pointer',
-                                    }}>Approve</button>
-                                    <button style={{
-                                        background: 'transparent', color: '#534AB7',
-                                        border: '1px solid #534AB7', padding: '4px 10px',
-                                        borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
-                                    }}>Review</button>
-                                </div>
+
+                                {a.status ? (
+                                    <div style={{
+                                        fontSize: '11px', fontWeight: '500',
+                                        color: a.status === 'approved' ? '#1d9e75' : '#534AB7',
+                                    }}>
+                                        {a.status === 'approved' ? '✓ Approved' : '👁 Marked for review'}
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                        <button
+                                            onClick={() => handleAction(a.id, 'approved')}
+                                            style={{
+                                                background: '#534AB7', color: '#fff', border: 'none',
+                                                padding: '4px 10px', borderRadius: '5px',
+                                                fontSize: '11px', cursor: 'pointer',
+                                            }}
+                                        >
+                                            Approve
+                                        </button>
+                                        <button
+                                            onClick={() => handleAction(a.id, 'reviewing')}
+                                            style={{
+                                                background: 'transparent', color: '#534AB7',
+                                                border: '1px solid #534AB7', padding: '4px 10px',
+                                                borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
+                                            }}
+                                        >
+                                            Review
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -189,11 +227,14 @@ export default function Dashboard() {
                         <div style={{ fontSize: '12px', color: dark ? '#8880c8' : '#534AB7', marginBottom: '12px', lineHeight: '1.5' }}>
                             Finalize Q3 bonuses by tomorrow at 5:00 PM to ensure timely payout.
                         </div>
-                        <button style={{
-                            width: '100%', background: '#534AB7', color: '#fff',
-                            border: 'none', padding: '8px', borderRadius: '6px',
-                            fontSize: '12px', cursor: 'pointer', fontWeight: '500',
-                        }}>
+                        <button
+                            onClick={() => navigate('/payroll')}
+                            style={{
+                                width: '100%', background: '#534AB7', color: '#fff',
+                                border: 'none', padding: '8px', borderRadius: '6px',
+                                fontSize: '12px', cursor: 'pointer', fontWeight: '500',
+                            }}
+                        >
                             Go to payroll
                         </button>
                     </div>
