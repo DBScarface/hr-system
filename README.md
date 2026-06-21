@@ -1,58 +1,89 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Veltahr
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-stack HR management system I'm building to get back into web development after a few years away from coding. Started as a simple CRUD app, turned into something bigger once I started adding role-based access and self-service features.
 
-## About Laravel
+Built with Laravel (API backend) + React (frontend) + MySQL.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What it does right now
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Login/auth with Laravel Sanctum, token-based
+- Three roles: admin, manager, employee — each sees a different version of the app
+- Employee management (add, edit, delete, view profile) — admin/manager only
+- Attendance tracking with daily check-in/check-out status, employees only see their own record
+- Payroll with automatic tax/insurance calculation — admin only
+- Leave requests — employees submit, admin/manager approve or reject, approved leave automatically updates attendance
+- PDF export for individual employee reports
+- Photo upload on employee profiles
+- Dashboard that changes depending on who's logged in (admin sees company-wide stuff, employees get a simplified view with quick links)
+- Dark mode and EN/FR language switch, both persist across the whole app
+- Basic reports page — headcount by department, attendance breakdown, payroll by department
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech stack
 
-## Learning Laravel
+**Backend:** Laravel 13, MySQL, Sanctum for API auth
+**Frontend:** React 18 (via Vite, no Next.js or anything, just plain React + React Router), Axios for API calls
+**Styling:** plain inline styles for now, no Tailwind/component library — wanted full control over the design while I was figuring out a visual identity for the app
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Why I'm building this
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+I have an engineering degree in IT but ended up working in a contact center for almost two years with zero coding. This is mainly a way to relearn the stack properly and have something real to show instead of another todo-list tutorial project. Trying to make it look and behave like something that could actually ship, not just a CRUD demo.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Setup
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+You'll need PHP 8.2+, Composer, Node, and MySQL running locally.
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/DBScarface/hr-system.git
+cd hr-system
 
-php artisan boost:install
+# backend
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Edit `.env` and point it at your MySQL database:
 
-## Contributing
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hr_system
+DB_USERNAME=root
+DB_PASSWORD=your_password 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Then:
+```bash
+php artisan migrate
+php artisan db:seed --class=EmployeeSeeder
+php artisan db:seed --class=AttendanceSeeder
 
-## Code of Conduct
+# frontend
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Run it (needs three terminals, or use a process manager if you've got one set up):
+```bash
+php artisan serve
+npm run dev
+```
 
-## Security Vulnerabilities
+Visit `http://127.0.0.1:8000`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+There's no registration page yet — accounts get created manually via `php artisan tinker`. Default admin login needs to be created the same way; check `AuthController.php` for how the login endpoint expects credentials.
+
+## Status
+
+This is not finished. It's a side project I work on in between other things, so expect gaps. Known stuff that's missing or half-built:
+
+- No real document storage (the "document vault" on employee profiles is a placeholder)
+- Performance reviews section on employee profiles is also just a placeholder — no backend for it yet
+- No email notifications anywhere
+- No tests written yet (I know, I know)
+- Manager role exists but currently has close to the same permissions as admin except payroll — needs more granular separation
+- Mobile responsiveness hasn't really been considered, this is desktop-first right now
+
+If you're looking at this as a recruiter or admissions reviewer — this is meant to show where I am right now, actively rebuilding my skills, not a polished final product. Happy to walk through any part of the code or the decisions behind it.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Not decided yet, treat it as all rights reserved for now.
