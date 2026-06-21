@@ -16,15 +16,19 @@ export default function AppLayout({ children }) {
     };
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = user.role || 'admin';
 
-    const navItems = [
-        { key: 'dashboard', label: { EN: 'Dashboard', FR: 'Tableau de bord' }, icon: '⊞', path: '/dashboard' },
-        { key: 'employees', label: { EN: 'Employees', FR: 'Employés' }, icon: '👥', path: '/employees' },
-        { key: 'attendance', label: { EN: 'Attendance', FR: 'Présences' }, icon: '📅', path: '/attendance' },
-        { key: 'payroll', label: { EN: 'Payroll', FR: 'Paie' }, icon: '💰', path: '/payroll' },
-        { key: 'reports', label: { EN: 'Reports', FR: 'Rapports' }, icon: '📊', path: '/reports' },
-        { key: 'settings', label: { EN: 'Settings', FR: 'Paramètres' }, icon: '⚙️', path: '/settings' },
+    const allNavItems = [
+    { key: 'dashboard', label: { EN: 'Dashboard', FR: 'Tableau de bord' }, icon: '⊞', path: '/dashboard', roles: ['admin', 'manager', 'employee'] },
+    { key: 'employees', label: { EN: 'Employees', FR: 'Employés' }, icon: '👥', path: '/employees', roles: ['admin', 'manager'] },
+    { key: 'attendance', label: { EN: 'Attendance', FR: 'Présences' }, icon: '📅', path: '/attendance', roles: ['admin', 'manager', 'employee'] },
+    { key: 'leave', label: { EN: 'Leave requests', FR: 'Demandes de congé' }, icon: '🌴', path: '/leave', roles: ['admin', 'manager', 'employee'] },
+    { key: 'payroll', label: { EN: 'Payroll', FR: 'Paie' }, icon: '💰', path: '/payroll', roles: ['admin'] },
+    { key: 'reports', label: { EN: 'Reports', FR: 'Rapports' }, icon: '📊', path: '/reports', roles: ['admin', 'manager'] },
+    { key: 'settings', label: { EN: 'Settings', FR: 'Paramètres' }, icon: '⚙️', path: '/settings', roles: ['admin', 'manager', 'employee'] },
     ];
+
+    const navItems = allNavItems.filter(item => item.roles.includes(role));
 
     return (
         <div style={{

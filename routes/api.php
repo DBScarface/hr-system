@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\LeaveRequestController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -30,6 +31,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin,manager')->group(function () {
         Route::post('/attendance', [AttendanceController::class, 'store']);
     });
+
+    // Leave Requests: employees can submit, admin/manager can approve/reject
+    Route::get('/leave-requests', [LeaveRequestController::class, 'index']);
+    Route::post('/leave-requests', [LeaveRequestController::class, 'store']);
+    Route::put('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'update']);
+    Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy']);
 
     // Payroll: admin only
     Route::middleware('role:admin')->group(function () {
