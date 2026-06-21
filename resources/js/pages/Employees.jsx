@@ -7,6 +7,9 @@ import { useApp } from '../context/AppContext';
 export default function Employees() {
     const { theme } = useApp();
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const canManage = user.role === 'admin' || user.role === 'manager';
+
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -90,13 +93,15 @@ export default function Employees() {
                         {employees.length} total employees
                     </p>
                 </div>
-                <button onClick={() => setShowModal(true)} style={{
-                    background: '#534AB7', color: '#fff', border: 'none',
-                    padding: '9px 16px', borderRadius: '8px',
-                    fontSize: '13px', fontWeight: '500', cursor: 'pointer',
-                }}>
-                    + Add employee
-                </button>
+                {canManage && (
+                    <button onClick={() => setShowModal(true)} style={{
+                        background: '#534AB7', color: '#fff', border: 'none',
+                        padding: '9px 16px', borderRadius: '8px',
+                        fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                    }}>
+                        + Add employee
+                    </button>
+                )}
             </div>
 
             {/* Search */}
@@ -112,12 +117,15 @@ export default function Employees() {
             <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '10px', overflow: 'hidden' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
+                    gridTemplateColumns: canManage ? '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px' : '2fr 2fr 1.5fr 1.5fr 1fr 1fr',
                     padding: '10px 16px',
                     borderBottom: `1px solid ${theme.border}`,
                     background: theme.actionBg,
                 }}>
-                    {['Employee', 'Email', 'Department', 'Position', 'Status', 'Hire date', ''].map((h, i) => (
+                    {(canManage
+                        ? ['Employee', 'Email', 'Department', 'Position', 'Status', 'Hire date', '']
+                        : ['Employee', 'Email', 'Department', 'Position', 'Status', 'Hire date']
+                    ).map((h, i) => (
                         <div key={i} style={{ fontSize: '11px', color: theme.textMuted, fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                             {h}
                         </div>
@@ -137,7 +145,7 @@ export default function Employees() {
                                 onClick={() => navigate(`/employees/${e.id}`)}
                                 style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px',
+                                    gridTemplateColumns: canManage ? '2fr 2fr 1.5fr 1.5fr 1fr 1fr 80px' : '2fr 2fr 1.5fr 1.5fr 1fr 1fr',
                                     padding: '12px 16px', alignItems: 'center',
                                     borderBottom: i < filtered.length - 1 ? `1px solid ${theme.rowBorder}` : 'none',
                                     transition: 'background 0.1s',
@@ -172,13 +180,15 @@ export default function Employees() {
                                 <div style={{ fontSize: '12px', color: theme.textMuted }}>
                                     {new Date(e.hire_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </div>
-                                <button onClick={(ev) => handleDelete(ev, e.id)} style={{
-                                    background: 'transparent', border: '1px solid #fecaca',
-                                    color: '#dc2626', padding: '4px 8px',
-                                    borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
-                                }}>
-                                    Delete
-                                </button>
+                                {canManage && (
+                                    <button onClick={(ev) => handleDelete(ev, e.id)} style={{
+                                        background: 'transparent', border: '1px solid #fecaca',
+                                        color: '#dc2626', padding: '4px 8px',
+                                        borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
+                                    }}>
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         );
                     })

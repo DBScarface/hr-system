@@ -10,34 +10,37 @@ use Carbon\Carbon;
 class AttendanceController extends Controller
 {
     public function index(Request $request)
-    {
-        $date = $request->query('date', Carbon::today()->toDateString());
+{
+    $date = $request->query('date', Carbon::today()->toDateString());
+    $user = $request->user();
 
-        $employees = Employee::all();
+    $employees = $user->role === 'employee'
+        ? Employee::where('id', $user->employee_id)->get()
+        : Employee::all();
 
-        $attendance = Attendance::with('employee')
-            ->where('date', $date)
-            ->get()
-            ->keyBy('employee_id');
+    $attendance = Attendance::with('employee')
+        ->where('date', $date)
+        ->get()
+        ->keyBy('employee_id');
 
-        $result = $employees->map(function ($employee) use ($attendance, $date) {
-            $record = $attendance->get($employee->id);
-            return [
-                'employee_id'   => $employee->id,
-                'employee_name' => $employee->first_name . ' ' . $employee->last_name,
-                'department'    => $employee->department,
-                'position'      => $employee->position,
-                'date'          => $date,
-                'check_in'      => $record?->check_in,
-                'check_out'     => $record?->check_out,
-                'status'        => $record?->status ?? 'absent',
-                'notes'         => $record?->notes,
-                'attendance_id' => $record?->id,
-            ];
-        });
+    $result = $employees->map(function ($employee) use ($attendance, $date) {
+        $record = $attendance->get($employee->id);
+        return [
+            'employee_id'   => $employee->id,
+            'employee_name' => $employee->first_name . ' ' . $employee->last_name,
+            'department'    => $employee->department,
+            'position'      => $employee->position,
+            'date'          => $date,
+            'check_in'      => $record?->check_in,
+            'check_out'     => $record?->check_out,
+            'status'        => $record?->status ?? 'absent',
+            'notes'         => $record?->notes,
+            'attendance_id' => $record?->id,
+        ];
+    });
 
-        return response()->json($result);
-    }
+    return response()->json($result);
+}
 
     public function store(Request $request)
     {

@@ -7,10 +7,16 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
-    public function index()
-    {
-        return response()->json(Employee::orderBy('created_at', 'desc')->get());
+    public function index(Request $request)
+{
+    $user = $request->user();
+
+    if ($user->role === 'employee') {
+        return response()->json(Employee::where('id', $user->employee_id)->get());
     }
+
+    return response()->json(Employee::orderBy('created_at', 'desc')->get());
+}
 
     public function store(Request $request)
     {
@@ -30,8 +36,14 @@ class EmployeeController extends Controller
         return response()->json($employee, 201);
     }
 
-    public function show(Employee $employee)
+    public function show(Request $request, Employee $employee)
 {
+    $user = $request->user();
+
+    if ($user->role === 'employee' && $user->employee_id !== $employee->id) {
+        return response()->json(['message' => 'Forbidden'], 403);
+    }
+
     $attendanceCount = \App\Models\Attendance::where('employee_id', $employee->id)
         ->where('status', 'present')
         ->count();

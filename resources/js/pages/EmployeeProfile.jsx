@@ -36,7 +36,11 @@ export default function EmployeeProfile() {
                 photo: res.data.employee.photo || '',
             });
         } catch (err) {
-            console.error(err);
+         if (err.response?.status === 403) {
+            navigate('/dashboard');
+    } else {
+        console.error(err);
+    }
         } finally {
             setLoading(false);
         }

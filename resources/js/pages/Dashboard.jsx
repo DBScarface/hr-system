@@ -7,6 +7,8 @@ export default function Dashboard() {
     const { dark } = useApp();
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = user.role || 'admin';
+    const isApprover = role === 'admin' || role === 'manager';
 
     const metrics = [
         { label: 'Headcount', value: '248', delta: '↑ 4 this month', color: '#1d9e75' },
@@ -116,128 +118,165 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Employee List */}
-                    <div style={card}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Recent employees</span>
-                            <span
-                                onClick={() => navigate('/employees')}
-                                style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}
-                            >
-                                View all
-                            </span>
-                        </div>
-                        {employees.map((e, i) => (
-                            <div key={i} style={{
-                                display: 'flex', alignItems: 'center', gap: '10px',
-                                padding: '8px 0',
-                                borderBottom: i < employees.length - 1 ? `1px solid ${rowBorder}` : 'none',
-                            }}>
-                                <div style={{
-                                    width: '30px', height: '30px', borderRadius: '50%',
-                                    background: e.color, color: e.textColor,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '10px', fontWeight: '600', flexShrink: 0,
-                                }}>
-                                    {e.initials}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '13px', color: textPrimary }}>{e.name}</div>
-                                    <div style={{ fontSize: '11px', color: textMuted }}>{e.role}</div>
-                                </div>
-                                <span style={{
-                                    fontSize: '10px', padding: '2px 8px', borderRadius: '4px',
-                                    background: e.status === 'Active' ? '#eaf3de' : '#faeeda',
-                                    color: e.status === 'Active' ? '#3b6d11' : '#854f0b',
-                                }}>
-                                    {e.status}
+                    {/* Employee List — admin/manager only */}
+                    {isApprover && (
+                        <div style={card}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: '500', color: textPrimary }}>Recent employees</span>
+                                <span
+                                    onClick={() => navigate('/employees')}
+                                    style={{ fontSize: '11px', color: '#534AB7', cursor: 'pointer' }}
+                                >
+                                    View all
                                 </span>
                             </div>
-                        ))}
-                    </div>
+                            {employees.map((e, i) => (
+                                <div key={i} style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '8px 0',
+                                    borderBottom: i < employees.length - 1 ? `1px solid ${rowBorder}` : 'none',
+                                }}>
+                                    <div style={{
+                                        width: '30px', height: '30px', borderRadius: '50%',
+                                        background: e.color, color: e.textColor,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '10px', fontWeight: '600', flexShrink: 0,
+                                    }}>
+                                        {e.initials}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '13px', color: textPrimary }}>{e.name}</div>
+                                        <div style={{ fontSize: '11px', color: textMuted }}>{e.role}</div>
+                                    </div>
+                                    <span style={{
+                                        fontSize: '10px', padding: '2px 8px', borderRadius: '4px',
+                                        background: e.status === 'Active' ? '#eaf3de' : '#faeeda',
+                                        color: e.status === 'Active' ? '#3b6d11' : '#854f0b',
+                                    }}>
+                                        {e.status}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-                    {/* Action Items */}
-                    <div style={card}>
-                        <div style={{ fontSize: '13px', fontWeight: '500', color: textPrimary, marginBottom: '14px' }}>
-                            Action items
-                        </div>
-                        {actions.map((a, i) => (
-                            <div key={a.id} style={{
-                                background: dark ? '#0f1a2e' : '#f8f8fa',
-                                border: `1px solid ${dark ? '#1e2d45' : '#e5e5ea'}`,
-                                borderRadius: '8px', padding: '10px 12px',
-                                marginBottom: i < actions.length - 1 ? '8px' : '0',
-                                opacity: a.status ? 0.6 : 1,
-                                transition: 'opacity 0.2s',
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                    <span style={{ fontSize: '13px' }}>{a.icon}</span>
-                                    <span style={{ fontSize: '12px', fontWeight: '500', color: textPrimary }}>{a.title}</span>
-                                </div>
-                                <div style={{ fontSize: '11px', color: textMuted, marginBottom: '8px' }}>{a.sub}</div>
-
-                                {a.status ? (
-                                    <div style={{
-                                        fontSize: '11px', fontWeight: '500',
-                                        color: a.status === 'approved' ? '#1d9e75' : '#534AB7',
-                                    }}>
-                                        {a.status === 'approved' ? '✓ Approved' : '👁 Marked for review'}
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                        <button
-                                            onClick={() => handleAction(a.id, 'approved')}
-                                            style={{
-                                                background: '#534AB7', color: '#fff', border: 'none',
-                                                padding: '4px 10px', borderRadius: '5px',
-                                                fontSize: '11px', cursor: 'pointer',
-                                            }}
-                                        >
-                                            Approve
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction(a.id, 'reviewing')}
-                                            style={{
-                                                background: 'transparent', color: '#534AB7',
-                                                border: '1px solid #534AB7', padding: '4px 10px',
-                                                borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
-                                            }}
-                                        >
-                                            Review
-                                        </button>
-                                    </div>
-                                )}
+                    {/* Action Items — admin/manager only */}
+                    {isApprover && (
+                        <div style={card}>
+                            <div style={{ fontSize: '13px', fontWeight: '500', color: textPrimary, marginBottom: '14px' }}>
+                                Action items
                             </div>
-                        ))}
-                    </div>
+                            {actions.map((a, i) => (
+                                <div key={a.id} style={{
+                                    background: dark ? '#0f1a2e' : '#f8f8fa',
+                                    border: `1px solid ${dark ? '#1e2d45' : '#e5e5ea'}`,
+                                    borderRadius: '8px', padding: '10px 12px',
+                                    marginBottom: i < actions.length - 1 ? '8px' : '0',
+                                    opacity: a.status ? 0.6 : 1,
+                                    transition: 'opacity 0.2s',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                        <span style={{ fontSize: '13px' }}>{a.icon}</span>
+                                        <span style={{ fontSize: '12px', fontWeight: '500', color: textPrimary }}>{a.title}</span>
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: textMuted, marginBottom: '8px' }}>{a.sub}</div>
 
-                    {/* Payroll Alert */}
-                    <div style={{
-                        background: dark ? '#1a1a3a' : '#EEEDFE',
-                        border: `1px solid ${dark ? '#3C3489' : '#AFA9EC'}`,
-                        borderRadius: '10px', padding: '16px',
-                    }}>
-                        <div style={{ fontSize: '13px', fontWeight: '500', color: dark ? '#AFA9EC' : '#3C3489', marginBottom: '4px' }}>
-                            Payroll deadline
+                                    {a.status ? (
+                                        <div style={{
+                                            fontSize: '11px', fontWeight: '500',
+                                            color: a.status === 'approved' ? '#1d9e75' : '#534AB7',
+                                        }}>
+                                            {a.status === 'approved' ? '✓ Approved' : '👁 Marked for review'}
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '6px' }}>
+                                            <button
+                                                onClick={() => handleAction(a.id, 'approved')}
+                                                style={{
+                                                    background: '#534AB7', color: '#fff', border: 'none',
+                                                    padding: '4px 10px', borderRadius: '5px',
+                                                    fontSize: '11px', cursor: 'pointer',
+                                                }}
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                onClick={() => handleAction(a.id, 'reviewing')}
+                                                style={{
+                                                    background: 'transparent', color: '#534AB7',
+                                                    border: '1px solid #534AB7', padding: '4px 10px',
+                                                    borderRadius: '5px', fontSize: '11px', cursor: 'pointer',
+                                                }}
+                                            >
+                                                Review
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                        <div style={{ fontSize: '12px', color: dark ? '#8880c8' : '#534AB7', marginBottom: '12px', lineHeight: '1.5' }}>
-                            Finalize Q3 bonuses by tomorrow at 5:00 PM to ensure timely payout.
+                    )}
+
+                    {/* Payroll Alert — admin only */}
+                    {role === 'admin' && (
+                        <div style={{
+                            background: dark ? '#1a1a3a' : '#EEEDFE',
+                            border: `1px solid ${dark ? '#3C3489' : '#AFA9EC'}`,
+                            borderRadius: '10px', padding: '16px',
+                        }}>
+                            <div style={{ fontSize: '13px', fontWeight: '500', color: dark ? '#AFA9EC' : '#3C3489', marginBottom: '4px' }}>
+                                Payroll deadline
+                            </div>
+                            <div style={{ fontSize: '12px', color: dark ? '#8880c8' : '#534AB7', marginBottom: '12px', lineHeight: '1.5' }}>
+                                Finalize Q3 bonuses by tomorrow at 5:00 PM to ensure timely payout.
+                            </div>
+                            <button
+                                onClick={() => navigate('/payroll')}
+                                style={{
+                                    width: '100%', background: '#534AB7', color: '#fff',
+                                    border: 'none', padding: '8px', borderRadius: '6px',
+                                    fontSize: '12px', cursor: 'pointer', fontWeight: '500',
+                                }}
+                            >
+                                Go to payroll
+                            </button>
                         </div>
-                        <button
-                            onClick={() => navigate('/payroll')}
-                            style={{
-                                width: '100%', background: '#534AB7', color: '#fff',
-                                border: 'none', padding: '8px', borderRadius: '6px',
-                                fontSize: '12px', cursor: 'pointer', fontWeight: '500',
-                            }}
-                        >
-                            Go to payroll
-                        </button>
-                    </div>
+                    )}
+
+                    {/* Self-service quick links — employee only */}
+                    {role === 'employee' && (
+                        <div style={card}>
+                            <div style={{ fontSize: '13px', fontWeight: '500', color: textPrimary, marginBottom: '14px' }}>
+                                Quick links
+                            </div>
+                            <div
+                                onClick={() => navigate('/leave')}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
+                                    background: dark ? '#0f1a2e' : '#f8f8fa',
+                                    marginBottom: '8px', fontSize: '12px', color: textPrimary,
+                                }}
+                            >
+                                🌴 Request time off
+                            </div>
+                            <div
+                                onClick={() => navigate('/attendance')}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
+                                    background: dark ? '#0f1a2e' : '#f8f8fa',
+                                    fontSize: '12px', color: textPrimary,
+                                }}
+                            >
+                                📅 View my attendance
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

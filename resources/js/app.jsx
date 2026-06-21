@@ -13,6 +13,16 @@ import Payroll from './pages/Payroll';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
+
+function RoleRoute({ allowed, children }) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = user.role || 'admin';
+    if (!allowed.includes(role)) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    return children;
+}
+
 function App() {
     const token = localStorage.getItem('token');
 
@@ -23,13 +33,14 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" replace />} />
-                    <Route path="/employees" element={token ? <Employees /> : <Navigate to="/login" replace />} />
-                    <Route path="/employees/:id" element={token ? <EmployeeProfile /> : <Navigate to="/login" replace />} />
+                    <Route path="/employees" element={token ? <RoleRoute allowed={['admin', 'manager']}><Employees /></RoleRoute> : <Navigate to="/login" replace />} />
+                    <Route path="/employees/:id" element={token ? <RoleRoute allowed={['admin', 'manager']}><EmployeeProfile /></RoleRoute> : <Navigate to="/login" replace />} />
                     <Route path="/attendance" element={token ? <Attendance /> : <Navigate to="/login" replace />} />
                     <Route path="/leave" element={token ? <LeaveRequests /> : <Navigate to="/login" replace />} />
-                    <Route path="/payroll" element={token ? <Payroll /> : <Navigate to="/login" replace />} />
+                    <Route path="/reports" element={token ? <RoleRoute allowed={['admin', 'manager']}><Reports /></RoleRoute> : <Navigate to="/login" replace />} />
                     <Route path="/reports" element={token ? <Reports /> : <Navigate to="/login" replace />} />
                     <Route path="/settings" element={token ? <Settings /> : <Navigate to="/login" replace />} />
+
                 </Routes>
             </BrowserRouter>
         </AppProvider>

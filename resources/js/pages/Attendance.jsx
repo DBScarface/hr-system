@@ -5,6 +5,9 @@ import { useApp } from '../context/AppContext';
 
 export default function Attendance() {
     const { theme } = useApp();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const isApprover = user.role === 'admin' || user.role === 'manager';
+
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -64,6 +67,14 @@ export default function Attendance() {
         on_leave: records.filter(r => r.status === 'on_leave').length,
     };
 
+    const gridCols = isApprover
+        ? '2fr 1.5fr 1fr 1fr 1fr 1.5fr'
+        : '2fr 1.5fr 1fr 1fr 1fr';
+
+    const headers = isApprover
+        ? ['Employee', 'Department', 'Check in', 'Check out', 'Status', 'Action']
+        : ['Employee', 'Department', 'Check in', 'Check out', 'Status'];
+
     return (
         <AppLayout>
             {/* Header */}
@@ -73,7 +84,7 @@ export default function Attendance() {
                         Attendance
                     </h1>
                     <p style={{ fontSize: '13px', color: theme.textMuted, margin: 0 }}>
-                        Daily attendance tracking for all employees
+                        {isApprover ? 'Daily attendance tracking for all employees' : 'Your daily attendance record'}
                     </p>
                 </div>
                 <input
@@ -110,7 +121,7 @@ export default function Attendance() {
                             {summary[s.key]}
                         </div>
                         <div style={{ fontSize: '11px', color: theme.textMuted, marginTop: '4px' }}>
-                            out of {records.length} employees
+                            out of {records.length} employee{records.length !== 1 ? 's' : ''}
                         </div>
                     </div>
                 ))}
@@ -121,12 +132,12 @@ export default function Attendance() {
                 {/* Table Header */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1.5fr',
+                    gridTemplateColumns: gridCols,
                     padding: '10px 16px',
                     borderBottom: `1px solid ${theme.border}`,
                     background: theme.actionBg,
                 }}>
-                    {['Employee', 'Department', 'Check in', 'Check out', 'Status', 'Action'].map((h, i) => (
+                    {headers.map((h, i) => (
                         <div key={i} style={{ fontSize: '11px', color: theme.textMuted, fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                             {h}
                         </div>
@@ -138,13 +149,17 @@ export default function Attendance() {
                     <div style={{ padding: '40px', textAlign: 'center', color: theme.textMuted, fontSize: '13px' }}>
                         Loading...
                     </div>
+                ) : records.length === 0 ? (
+                    <div style={{ padding: '40px', textAlign: 'center', color: theme.textMuted, fontSize: '13px' }}>
+                        No attendance record for this date.
+                    </div>
                 ) : records.map((r, i) => {
                     const av = avatarColors[i % avatarColors.length];
                     const sc = statusConfig[r.status] || statusConfig.absent;
                     return (
                         <div key={r.employee_id} style={{
                             display: 'grid',
-                            gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1.5fr',
+                            gridTemplateColumns: gridCols,
                             padding: '12px 16px', alignItems: 'center',
                             borderBottom: i < records.length - 1 ? `1px solid ${theme.rowBorder}` : 'none',
                             transition: 'background 0.1s',
@@ -186,25 +201,27 @@ export default function Attendance() {
                                 {sc.label}
                             </span>
 
-                            {/* Action Buttons */}
-                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                                {['present', 'late', 'absent', 'on_leave'].map(s => (
-                                    <button
-                                        key={s}
-                                        onClick={() => updateStatus(r.employee_id, s)}
-                                        style={{
-                                            padding: '3px 7px', borderRadius: '4px',
-                                            fontSize: '10px', cursor: 'pointer',
-                                            border: `1px solid ${statusConfig[s].color}`,
-                                            background: r.status === s ? statusConfig[s].bg : 'transparent',
-                                            color: statusConfig[s].color,
-                                            fontWeight: r.status === s ? '600' : '400',
-                                        }}
-                                    >
-                                        {statusConfig[s].label}
-                                    </button>
-                                ))}
-                            </div>
+                            {/* Action Buttons — admin/manager only */}
+                            {isApprover && (
+                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                    {['present', 'late', 'absent', 'on_leave'].map(s => (
+                                        <button
+                                            key={s}
+                                            onClick={() => updateStatus(r.employee_id, s)}
+                                            style={{
+                                                padding: '3px 7px', borderRadius: '4px',
+                                                fontSize: '10px', cursor: 'pointer',
+                                                border: `1px solid ${statusConfig[s].color}`,
+                                                background: r.status === s ? statusConfig[s].bg : 'transparent',
+                                                color: statusConfig[s].color,
+                                                fontWeight: r.status === s ? '600' : '400',
+                                            }}
+                                        >
+                                            {statusConfig[s].label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     );
                 })}
